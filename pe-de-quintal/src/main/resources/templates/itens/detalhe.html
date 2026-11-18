@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head(${anuncio.titulo})}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('itens')}"></header>
+
+<main class="conteudo">
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <p><a th:href="@{/itens}" class="voltar">← Voltar para os itens</a></p>
+
+    <article class="detalhe">
+        <div class="detalhe-foto">
+            <img th:if="${anuncio.fotoUrl != null}" th:src="@{${anuncio.fotoUrl}}" th:alt="${anuncio.titulo}">
+            <th:block th:if="${anuncio.fotoUrl == null}">
+                <span th:replace="~{fragments/layout :: icone(${anuncio.categoria.nome})}"></span>
+            </th:block>
+        </div>
+
+        <div class="detalhe-info">
+            <h1 th:text="${anuncio.titulo} + ' — ' + ${anuncio.quantidadeFormatada} + ' ' + ${anuncio.unidade}">Limão taiti — 3 kg</h1>
+
+            <div class="selos">
+                <span class="selo" th:classappend="${anuncio.troca} ? 'selo-troca' : 'selo-doacao'"
+                      th:text="${anuncio.modalidade.descricao}">Troca</span>
+                <span class="selo selo-categoria" th:text="${anuncio.categoria.nome}">Fruta</span>
+                <span class="status" th:classappend="'status-' + ${#strings.toLowerCase(anuncio.status.name())}"
+                      th:text="${anuncio.status.descricao}">Ativo</span>
+            </div>
+
+            <p class="descricao" th:if="${anuncio.descricao != null}" th:text="${anuncio.descricao}">Descrição</p>
+            <p class="quer" th:if="${anuncio.troca and anuncio.desejaReceber != null}">
+                <strong>Deseja receber:</strong> <span th:text="${anuncio.desejaReceber}">cheiro-verde</span>
+            </p>
+
+            <div class="bloco">
+                <h4>Anunciante</h4>
+                <p><strong th:text="${anuncio.usuario.nomeCurto}">João P.</strong>
+                   · <span th:text="${anuncio.usuario.cidade} + '/' + ${anuncio.usuario.uf}">Sete Lagoas/MG</span></p>
+                <p>Disponível até <span th:text="${#temporals.format(anuncio.disponivelAte, 'dd/MM/yyyy')}">30/09/2026</span></p>
+            </div>
+
+            <div class="bloco">
+                <h4>Retirada</h4>
+                <p th:text="${anuncio.localRetirada}">Centro — Sete Lagoas/MG</p>
+            </div>
+
+            <!-- Contato só aparece para quem teve a proposta aceita (LGPD) -->
+            <div class="alerta contato" th:if="${contatoLiberado}">
+                Sua proposta foi aceita! Contato do anunciante:
+                <strong th:text="${anuncio.usuario.telefone}">(31) 9xxxx-xxxx</strong>.
+                Combine a retirada e depois confirme a entrega em
+                <a th:href="@{/propostas(aba='enviadas')}">Minhas propostas</a>.
+            </div>
+
+            <!-- Dono do anúncio -->
+            <div class="bloco dono" th:if="${ehDono}">
+                <p>Este é o seu anúncio.
+                   <a th:href="@{/propostas}">Ver propostas recebidas</a></p>
+                <form th:if="${anuncio.ativo}" th:action="@{/itens/{id}/excluir(id=${anuncio.id})}" method="post"
+                      onsubmit="return confirm('Excluir este anúncio? As propostas pendentes também serão removidas.');">
+                    <button type="submit" class="botao botao-perigo">Excluir anúncio</button>
+                </form>
+            </div>
+
+            <!-- Já enviou proposta -->
+            <div class="alerta info" th:if="${jaPropos}">
+                Você já enviou uma proposta para este item. Aguarde a resposta em
+                <a th:href="@{/propostas(aba='enviadas')}">Minhas propostas</a>.
+            </div>
+
+            <!-- Item indisponível para quem não é dono -->
+            <div class="alerta info" th:if="${!ehDono and !anuncio.ativo and !contatoLiberado}">
+                Este item não está mais disponível.
+            </div>
+
+            <!-- Enviar proposta (na própria tela, sem passo extra) -->
+            <form th:if="${podePropor}" th:action="@{/itens/{id}/propostas(id=${anuncio.id})}"
+                  th:object="${propostaForm}" method="post" class="formulario painel">
+                <label for="itemOferecido"
+                       th:text="${anuncio.troca} ? 'O que você oferece em troca?' : 'Quer oferecer algo? (opcional)'">
+                    O que você oferece em troca?</label>
+                <input type="text" th:field="*{itemOferecido}" maxlength="200"
+                       placeholder="Ex.: cenoura orgânica 1 kg" th:required="${anuncio.troca}">
+
+                <label for="mensagem">Mensagem (opcional)</label>
+                <textarea th:field="*{mensagem}" rows="2" maxlength="500"
+                          placeholder="Ex.: Posso buscar amanhã depois das 18h."></textarea>
+
+                <button type="submit" class="botao botao-acao largo">Enviar proposta</button>
+            </form>
+        </div>
+    </article>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

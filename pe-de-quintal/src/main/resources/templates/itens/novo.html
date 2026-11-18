@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Publicar item')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('publicar')}"></header>
+
+<main class="conteudo estreito">
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h1>Publicar um item do seu quintal</h1>
+
+    <!-- enctype multipart: necessário para enviar a foto junto com os campos -->
+    <form th:action="@{/itens}" th:object="${anuncioForm}" method="post" enctype="multipart/form-data"
+          class="formulario painel" novalidate>
+
+        <label for="foto">Foto (opcional — JPG, PNG ou WEBP, até 5 MB)</label>
+        <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp,image/gif" class="campo-foto">
+
+        <label for="titulo">Título do item</label>
+        <input type="text" th:field="*{titulo}" maxlength="100" placeholder="Ex.: Limão taiti colhido hoje">
+        <small class="erro-campo" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
+
+        <label for="descricao">Descrição (opcional)</label>
+        <textarea th:field="*{descricao}" rows="3" maxlength="500"
+                  placeholder="Como foi cultivado, quando foi colhido..."></textarea>
+        <small class="erro-campo" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></small>
+
+        <div class="linha">
+            <div>
+                <label for="categoriaId">Categoria</label>
+                <select th:field="*{categoriaId}">
+                    <option value="">Selecione...</option>
+                    <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}">Fruta</option>
+                </select>
+                <small class="erro-campo" th:if="${#fields.hasErrors('categoriaId')}" th:errors="*{categoriaId}"></small>
+            </div>
+            <div>
+                <label for="quantidade">Quantidade</label>
+                <input type="number" th:field="*{quantidade}" step="0.01" min="0.01" placeholder="3">
+                <small class="erro-campo" th:if="${#fields.hasErrors('quantidade')}" th:errors="*{quantidade}"></small>
+            </div>
+            <div>
+                <label for="unidade">Unidade</label>
+                <select th:field="*{unidade}">
+                    <option value="">Selecione...</option>
+                    <option th:each="u : ${unidades}" th:value="${u}" th:text="${u}">kg</option>
+                </select>
+                <small class="erro-campo" th:if="${#fields.hasErrors('unidade')}" th:errors="*{unidade}"></small>
+            </div>
+        </div>
+
+        <fieldset class="modalidade">
+            <legend>Modalidade</legend>
+            <label th:each="m : ${modalidades}" class="opcao">
+                <input type="radio" th:field="*{modalidade}" th:value="${m}">
+                <span th:text="${m.descricao}">Doação</span>
+            </label>
+        </fieldset>
+
+        <label for="desejaReceber">Desejo receber em troca (opcional, só para troca)</label>
+        <input type="text" th:field="*{desejaReceber}" maxlength="200" placeholder="Cheiro-verde, pimentão...">
+        <small class="erro-campo" th:if="${#fields.hasErrors('desejaReceber')}" th:errors="*{desejaReceber}"></small>
+
+        <div class="linha">
+            <div class="col-grande">
+                <label for="localRetirada">Local de retirada</label>
+                <input type="text" th:field="*{localRetirada}" maxlength="150" placeholder="Centro — Sete Lagoas/MG">
+                <small class="erro-campo" th:if="${#fields.hasErrors('localRetirada')}" th:errors="*{localRetirada}"></small>
+            </div>
+            <div>
+                <label for="disponivelAte">Disponível até</label>
+                <input type="date" th:field="*{disponivelAte}" th:attr="min=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}">
+                <small class="erro-campo" th:if="${#fields.hasErrors('disponivelAte')}" th:errors="*{disponivelAte}"></small>
+            </div>
+        </div>
+
+        <div class="acoes">
+            <button type="submit" class="botao botao-acao">Publicar</button>
+            <a th:href="@{/itens}" class="botao botao-secundario">Cancelar</a>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

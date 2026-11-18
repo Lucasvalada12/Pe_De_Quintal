@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+
+<!-- <head> comum a todas as páginas -->
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' · Pé de Quintal'">Pé de Quintal</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<!-- Header horizontal (usuário logado) -->
+<header th:fragment="header(ativo)" class="topo">
+    <div class="topo-conteudo">
+        <a class="logo" th:href="@{/itens}">🌱 Pé de Quintal</a>
+        <nav class="menu">
+            <a th:href="@{/itens}" th:classappend="${ativo == 'itens'} ? 'ativo'">Itens</a>
+            <a th:href="@{/itens/novo}" th:classappend="${ativo == 'publicar'} ? 'ativo'">Publicar</a>
+            <a th:href="@{/propostas}" th:classappend="${ativo == 'propostas'} ? 'ativo'">
+                Minhas propostas
+                <span class="contador" th:if="${pendentesRecebidas > 0}" th:text="${pendentesRecebidas}">2</span>
+            </a>
+        </nav>
+        <div class="usuario" th:if="${usuarioLogado != null}">
+            <span th:text="${usuarioLogado.nome.split(' ')[0]}">Lucas</span>
+            <form th:action="@{/logout}" method="post" class="inline">
+                <button type="submit" class="link-sair">Sair</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<!-- Mensagens de confirmação/erro (flash attributes do redirect) -->
+<div th:fragment="mensagens" class="mensagens">
+    <div class="alerta sucesso" th:if="${sucesso}" th:text="${sucesso}">Tudo certo!</div>
+    <div class="alerta erro" th:if="${erro}" th:text="${erro}">Algo deu errado.</div>
+</div>
+
+<!-- Ícone de placeholder quando o anúncio não tem foto -->
+<span th:fragment="icone(categoria)" th:switch="${categoria}" class="icone-categoria">
+    <span th:case="'Hortaliça'">🥬</span>
+    <span th:case="'Fruta'">🍋</span>
+    <span th:case="'Tempero'">🌿</span>
+    <span th:case="'Muda'">🌱</span>
+    <span th:case="*">🧺</span>
+</span>
+
+<footer th:fragment="rodape" class="rodape">
+    Pé de Quintal — <em>Nada do seu quintal se perde.</em>
+</footer>
+
+</body>
+</html>

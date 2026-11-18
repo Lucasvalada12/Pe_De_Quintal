@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Criar conta')}"></head>
+<body class="pagina-auth">
+
+<main class="auth">
+    <section class="auth-marca">
+        <h1>🌱 Pé de Quintal</h1>
+        <p class="slogan">Nada do seu quintal se perde.</p>
+        <p>O cadastro pede só o essencial. Seu telefone só aparece para quem tiver uma proposta aceita.</p>
+    </section>
+
+    <section class="auth-card">
+        <h2>Criar conta</h2>
+
+        <!-- th:object liga o formulário ao CadastroForm; th:field preenche name, id e value -->
+        <form th:action="@{/cadastro}" th:object="${cadastroForm}" method="post" class="formulario" novalidate>
+            <label for="nome">Nome</label>
+            <input type="text" th:field="*{nome}" maxlength="100" placeholder="Seu nome completo">
+            <small class="erro-campo" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></small>
+
+            <label for="email">E-mail</label>
+            <input type="email" th:field="*{email}" maxlength="150" placeholder="seuemail@exemplo.com">
+            <small class="erro-campo" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+
+            <label for="telefone">Telefone (WhatsApp)</label>
+            <input type="tel" th:field="*{telefone}" maxlength="20" placeholder="(31) 99999-9999">
+            <small class="erro-campo" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></small>
+
+            <label for="senha">Senha</label>
+            <input type="password" th:field="*{senha}" maxlength="60" placeholder="Mínimo 6 caracteres">
+            <small class="erro-campo" th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}"></small>
+
+            <div class="linha">
+                <div class="col-grande">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" th:field="*{cidade}" maxlength="100" placeholder="Sete Lagoas">
+                    <small class="erro-campo" th:if="${#fields.hasErrors('cidade')}" th:errors="*{cidade}"></small>
+                </div>
+                <div class="col-pequena">
+                    <label for="uf">UF</label>
+                    <input type="text" th:field="*{uf}" maxlength="2" placeholder="MG" class="maiusculo">
+                    <small class="erro-campo" th:if="${#fields.hasErrors('uf')}" th:errors="*{uf}"></small>
+                </div>
+            </div>
+
+            <button type="submit" class="botao botao-primario largo">Criar conta</button>
+        </form>
+
+        <p class="centro">Já tem conta? <a th:href="@{/login}">Entrar</a></p>
+    </section>
+</main>
+
+</body>
+</html>

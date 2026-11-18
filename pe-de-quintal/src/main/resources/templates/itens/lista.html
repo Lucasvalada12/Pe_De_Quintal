@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Itens disponíveis')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('itens')}"></header>
+
+<main class="conteudo">
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <!-- Busca + filtros: GET com query string (?busca=&categoria=&cidade=) -->
+    <form th:action="@{/itens}" method="get" class="filtros">
+        <input type="search" name="busca" th:value="${busca}" placeholder="Buscar por alface, limão, manga...">
+
+        <select name="categoria">
+            <option value="">Todas as categorias</option>
+            <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}"
+                    th:selected="${c.id == categoriaSelecionada}">Fruta</option>
+        </select>
+
+        <select name="cidade">
+            <option value="">Todas as cidades</option>
+            <option th:each="cid : ${cidades}" th:value="${cid}" th:text="${cid}"
+                    th:selected="${cid == cidadeSelecionada}">Sete Lagoas</option>
+        </select>
+
+        <button type="submit" class="botao botao-acao">Buscar</button>
+        <a th:href="@{/itens}" class="link-limpar"
+           th:if="${busca != null and busca != '' or categoriaSelecionada != null or (cidadeSelecionada != null and cidadeSelecionada != '')}">Limpar</a>
+    </form>
+
+    <p class="resumo">
+        <strong th:text="${#lists.size(anuncios)}">24</strong>
+        <span th:text="${#lists.size(anuncios) == 1} ? 'item disponível' : 'itens disponíveis'">itens disponíveis</span>
+        <span th:if="${cidadeSelecionada != null and cidadeSelecionada != ''}" th:text="'em ' + ${cidadeSelecionada}"></span>
+    </p>
+
+    <div class="vazio" th:if="${#lists.isEmpty(anuncios)}">
+        <p>Nenhum item encontrado. 🌾</p>
+        <a th:href="@{/itens/novo}" class="botao botao-acao">Publicar o primeiro item</a>
+    </div>
+
+    <!-- Grade de cards (W2). Clicar no card abre o detalhe. -->
+    <div class="grade">
+        <a th:each="a : ${anuncios}" th:href="@{/itens/{id}(id=${a.id})}" class="card">
+            <div class="card-foto">
+                <img th:if="${a.fotoUrl != null}" th:src="@{${a.fotoUrl}}" th:alt="${a.titulo}">
+                <th:block th:if="${a.fotoUrl == null}">
+                    <span th:replace="~{fragments/layout :: icone(${a.categoria.nome})}"></span>
+                </th:block>
+            </div>
+            <div class="card-corpo">
+                <h3 th:text="${a.titulo}">Alface crespa</h3>
+                <p class="quantidade" th:text="${a.quantidadeFormatada} + ' ' + ${a.unidade}">6 pé</p>
+                <p class="anunciante" th:text="${a.usuario.nomeCurto} + ' · ' + ${a.usuario.cidade} + '/' + ${a.usuario.uf}">Maria S.</p>
+                <div class="card-rodape">
+                    <span class="selo" th:classappend="${a.troca} ? 'selo-troca' : 'selo-doacao'"
+                          th:text="${a.modalidade.descricao}">Doação</span>
+                    <span class="quer" th:if="${a.troca and a.desejaReceber != null}"
+                          th:text="'Quer: ' + ${a.desejaReceber}">Quer: cheiro-verde</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>

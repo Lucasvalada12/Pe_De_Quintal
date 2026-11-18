@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head th:replace="~{fragments/layout :: head('Minhas propostas')}"></head>
+<body>
+
+<header th:replace="~{fragments/layout :: header('propostas')}"></header>
+
+<main class="conteudo">
+    <div th:replace="~{fragments/layout :: mensagens}"></div>
+
+    <h1>Minhas propostas</h1>
+
+    <!-- Abas -->
+    <nav class="abas">
+        <a th:href="@{/propostas}" th:classappend="${aba == 'recebidas'} ? 'ativa'"
+           th:text="'Recebidas (' + ${#lists.size(recebidas)} + ')'">Recebidas (2)</a>
+        <a th:href="@{/propostas(aba='enviadas')}" th:classappend="${aba == 'enviadas'} ? 'ativa'"
+           th:text="'Enviadas (' + ${#lists.size(enviadas)} + ')'">Enviadas (1)</a>
+    </nav>
+
+    <!-- ===================== RECEBIDAS ===================== -->
+    <section th:if="${aba == 'recebidas'}" class="lista-propostas">
+        <p class="vazio" th:if="${#lists.isEmpty(recebidas)}">Você ainda não recebeu propostas.</p>
+
+        <div th:each="p : ${recebidas}" class="proposta" th:classappend="'proposta-' + ${#strings.toLowerCase(p.status.name())}">
+            <div class="proposta-texto">
+                <p class="titulo-proposta">
+                    <strong th:text="${p.proponente.nomeCurto}">Ana L.</strong> quer seu
+                    <a th:href="@{/itens/{id}(id=${p.anuncio.id})}" th:text="'“' + ${p.anuncio.titulo} + '”'">"Limão taiti"</a>
+                </p>
+                <p class="detalhes">
+                    <span th:if="${p.itemOferecido != null}">Oferece: <strong th:text="${p.itemOferecido}">cenoura orgânica 1 kg</strong> · </span>
+                    <span th:text="${p.proponente.cidade} + '/' + ${p.proponente.uf}">Sete Lagoas/MG</span> ·
+                    <span th:text="${#temporals.format(p.dataCriacao, 'dd/MM/yyyy HH:mm')}">22/09/2026 10:00</span>
+                </p>
+                <p class="mensagem" th:if="${p.mensagem != null}" th:text="'“' + ${p.mensagem} + '”'">mensagem</p>
+
+                <!-- Aceita: contato liberado -->
+                <div class="alerta contato" th:if="${p.aceita}">
+                    Proposta aceita em <span th:text="${#temporals.format(p.dataResposta, 'dd/MM')}">22/09</span>
+                    — contato liberado: <strong th:text="${p.proponente.telefone}">(31) 9xxxx-xxxx</strong>.
+                    <span th:if="${p.anuncio.status.name() == 'RESERVADO'}">Combine a retirada e clique em "Confirmar entrega".</span>
+                    <span th:if="${p.anuncio.status.name() == 'CONCLUIDO'}">Entrega confirmada. ✔</span>
+                </div>
+            </div>
+
+            <div class="proposta-acoes">
+                <th:block th:if="${p.pendente}">
+                    <form th:action="@{/propostas/{id}/aceitar(id=${p.id})}" method="post"
+                          onsubmit="return confirm('Aceitar esta proposta? As demais propostas pendentes deste item serão rejeitadas.');">
+                        <button type="submit" class="botao botao-primario">✓ Aceitar</button>
+                    </form>
+                    <form th:action="@{/propostas/{id}/rejeitar(id=${p.id})}" method="post">
+                        <button type="submit" class="botao botao-secundario">✕ Rejeitar</button>
+                    </form>
+                </th:block>
+                <form th:if="${p.aceita and p.anuncio.status.name() == 'RESERVADO'}"
+                      th:action="@{/propostas/{id}/concluir(id=${p.id})}" method="post">
+                    <button type="submit" class="botao botao-acao">Confirmar entrega</button>
+                </form>
+                <span th:if="${!p.pendente and !(p.aceita and p.anuncio.status.name() == 'RESERVADO')}"
+                      class="status" th:classappend="'status-' + ${#strings.toLowerCase(p.status.name())}"
+                      th:text="${p.status.descricao}">Rejeitada</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ENVIADAS ===================== -->
+    <section th:if="${aba == 'enviadas'}" class="lista-propostas">
+        <p class="vazio" th:if="${#lists.isEmpty(enviadas)}">
+            Você ainda não enviou propostas. <a th:href="@{/itens}">Ver itens disponíveis</a>
+        </p>
+
+        <div th:each="p : ${enviadas}" class="proposta" th:classappend="'proposta-' + ${#strings.toLowerCase(p.status.name())}">
+            <div class="proposta-texto">
+                <p class="titulo-proposta">
+                    Você quer <a th:href="@{/itens/{id}(id=${p.anuncio.id})}" th:text="'“' + ${p.anuncio.titulo} + '”'">"Tomate"</a>
+                    de <strong th:text="${p.anuncio.usuario.nomeCurto}">João P.</strong>
+                </p>
+                <p class="detalhes">
+                    <span th:if="${p.itemOferecido != null}">Você ofereceu: <strong th:text="${p.itemOferecido}">manjericão</strong> · </span>
+                    <span th:text="${#temporals.format(p.dataCriacao, 'dd/MM/yyyy HH:mm')}">22/09/2026 10:00</span>
+                </p>
+
+                <div class="alerta contato" th:if="${p.aceita}">
+                    Proposta aceita! Contato do anunciante:
+                    <strong th:text="${p.anuncio.usuario.telefone}">(31) 9xxxx-xxxx</strong>
+                    · Retirada: <span th:text="${p.anuncio.localRetirada}">Centro</span>.
+                    <span th:if="${p.anuncio.status.name() == 'CONCLUIDO'}">Entrega confirmada. ✔</span>
+                </div>
+            </div>
+
+            <div class="proposta-acoes">
+                <form th:if="${p.aceita and p.anuncio.status.name() == 'RESERVADO'}"
+                      th:action="@{/propostas/{id}/concluir(id=${p.id},aba='enviadas')}" method="post">
+                    <button type="submit" class="botao botao-acao">Confirmar entrega</button>
+                </form>
+                <span th:unless="${p.aceita and p.anuncio.status.name() == 'RESERVADO'}"
+                      class="status" th:classappend="'status-' + ${#strings.toLowerCase(p.status.name())}"
+                      th:text="${p.status.descricao}">Pendente</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== MEUS ANÚNCIOS ===================== -->
+    <h2 class="secao">Meus anúncios</h2>
+
+    <p class="vazio" th:if="${#lists.isEmpty(meusAnuncios)}">
+        Você ainda não publicou nada. <a th:href="@{/itens/novo}">Publicar um item</a>
+    </p>
+
+    <table class="tabela" th:unless="${#lists.isEmpty(meusAnuncios)}">
+        <thead>
+        <tr><th>Item</th><th>Modalidade</th><th>Propostas</th><th>Status</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${meusAnuncios}">
+            <td th:text="${a.titulo} + ' ' + ${a.quantidadeFormatada} + ' ' + ${a.unidade}">Limão taiti 3kg</td>
+            <td th:text="${a.modalidade.descricao}">Troca</td>
+            <td th:text="${#lists.size(a.propostas)}">1</td>
+            <td><span class="status" th:classappend="'status-' + ${#strings.toLowerCase(a.status.name())}"
+                      th:text="${a.status.descricao}">Ativo</span></td>
+            <td class="acoes-tabela">
+                <a th:href="@{/itens/{id}(id=${a.id})}">Ver</a>
+                <!-- ATIVO: pode excluir -->
+                <form th:if="${a.ativo}" th:action="@{/itens/{id}/excluir(id=${a.id})}" method="post" class="inline"
+                      onsubmit="return confirm('Excluir este anúncio?');">
+                    · <button type="submit" class="link-perigo">Excluir</button>
+                </form>
+                <!-- RESERVADO: confirmar entrega da proposta aceita -->
+                <th:block th:if="${a.status.name() == 'RESERVADO'}">
+                    <th:block th:each="p : ${a.propostas}">
+                        <form th:if="${p.aceita}" th:action="@{/propostas/{id}/concluir(id=${p.id})}" method="post" class="inline">
+                            · <button type="submit" class="botao botao-acao pequeno">Confirmar entrega</button>
+                        </form>
+                    </th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<footer th:replace="~{fragments/layout :: rodape}"></footer>
+</body>
+</html>
