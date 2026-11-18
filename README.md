@@ -48,7 +48,7 @@ Proposta:  PENDENTE ──> ACEITA   |   PENDENTE ──> REJEITADA
 ## 2. Etapa 1: Criar o banco no Supabase
 
 1. Crie um **New project** no Supabase (região *South America – São Paulo*) e **anote a senha do banco**.
-2. Abra o **SQL Editor** e execute o script [`database/01_schema.sql`](database/01_schema.sql).
+2. Abra o **SQL Editor** e execute o script [`pe-de-quintal/database/01_schema.sql`](pe-de-quintal/database/01_schema.sql).
    Ele cria as 5 tabelas (`usuario`, `categoria`, `anuncio`, `proposta`, `transacao`) e o seed das
    categorias (Hortaliça, Fruta, Tempero, Muda).
 3. Confira no **Table Editor** se as tabelas apareceram e se `categoria` tem 4 linhas.
@@ -63,7 +63,7 @@ Proposta:  PENDENTE ──> ACEITA   |   PENDENTE ──> REJEITADA
 
 ## 3. Etapa 2: Configurar a conexão
 
-Copie `.env.example` para **`.env`** (na mesma pasta do `pom.xml`) e preencha:
+Copie `.env.example` para **`.env`** (na mesma pasta do `pe-de-quintal/pom.xml`) e preencha:
 
 ```properties
 DB_URL=jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require
@@ -88,7 +88,7 @@ entidades batem com o script SQL.
 
 ## 4. Etapa 3: Executar
 
-Pré-requisitos: **JDK 21**, **Maven 3.9+** (ou a IDE: IntelliJ/Eclipse/VS Code importam o `pom.xml`).
+Pré-requisitos: **JDK 21**, **Maven 3.9+** (ou a IDE: IntelliJ/Eclipse/VS Code importam o `pe-de-quintal/pom.xml`).
 
 ```bash
 mvn spring-boot:run
@@ -142,12 +142,12 @@ recebem o formulário, chamam o service e fazem **Post/Redirect/Get** com flash 
 
 ## 7. Decisões de projeto
 
-- **Spring Boot 3.5.x** (estável, Java 21). Para usar 4.x, basta trocar a versão do `parent` no `pom.xml`.
+- **Spring Boot 3.5.x** (estável, Java 21). Para usar 4.x, basta trocar a versão do `parent` no `pe-de-quintal/pom.xml`.
 - **DTOs nos formulários** (`CadastroForm`, `AnuncioForm`) para não expor campos como `senhaHash`.
 - **Filtros com `""` e `0` em vez de `null`** na `@Query`: o PostgreSQL não descobre o tipo de um
   parâmetro nulo em `(:x IS NULL OR ...)`.
 - **`JOIN FETCH`** na lista de itens: anunciante e categoria vêm no mesmo SELECT (menos idas ao Supabase).
-- **Foto em pasta local** (`uploads/`), servida em `/uploads/**`. Em deploy com disco efêmero
+- **Foto em pasta local** (`pe-de-quintal/uploads`), servida em `/uploads/**`. Em deploy com disco efêmero
   (Render/Railway) as fotos se perdem ao reiniciar — limitação aceita no MVP.
 - **CSRF ligado**: o `th:action` do Thymeleaf injeta o token em todos os formulários automaticamente.
 
@@ -161,7 +161,7 @@ notificações, painel administrativo, relatórios, moderação, múltiplas foto
 ## 8. Erros comuns
 
 - **Timeout / Connection refused:** use o *Session pooler* e confira host, porta e usuário.
-- **password authentication failed:** senha errada ou `.env` fora da pasta do `pom.xml`.
+- **password authentication failed:** senha errada ou `.env` fora da pasta do `pe-de-quintal/pom.xml`.
 - **Schema-validation: missing table / wrong column type:** o `01_schema.sql` não foi executado
   (ou foi alterado). A mensagem diz qual tabela/coluna não bateu.
 - **Login sempre falha:** usuários criados direto no SQL precisam de senha em **BCrypt**; cadastre pela tela.
